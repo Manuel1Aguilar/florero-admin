@@ -1,0 +1,22 @@
+<div id="add-color-form-content">
+  <form hx-post="/admin/update-stock" hx-target="tbody" hx-swap="beforeend">
+    <div>
+      <label for="cName">Color Name:</label>
+      <input type="text" id="cName" name="cName" required>
+    </div>
+    <div>
+      <label for="cKey">Color Key:</label>
+      <input type="text" id="cKey" name="cKey" required>
+    </div>
+    <div>
+      <label for="hex_code">Hex Code:</label>
+      <input type="text" id="hex_code" name="hex_code" required>
+    </div>
+    <div>
+      <label for="stock">Stock:</label>
+      <input type="number" id="stock" name="new_stock" min="0" required>
+    </div>
+    <button type="submit">Add Color</button>
+  </form>
+</div>
+

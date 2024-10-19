@@ -1,0 +1,20 @@
+<tr id="order-<%= order.id %>">
+  <td><%= order.id %></td>
+  <td><%= order.client_name %></td>
+  <td><%= order.order_code %></td>
+  <td><%= order.color_spec %></td>
+  <td><%= order.status %></td>
+  <td>
+    <% if (order.status === 'Pending') { %>
+      <button hx-post="/admin/confirm-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Confirm</button>
+      <button hx-post="/admin/deny-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Deny</button>
+    <% } %>
+  </td>
+  <td>
+      <button hx-post="/admin/delete-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Delete</button>
+  </td>
+  <td>
+      <button hx-get="/admin/view-order/<%= order.id %>" hx-target="body" hx-swap="innerHTML">View Order</button>
+  </td>
+</tr>
+

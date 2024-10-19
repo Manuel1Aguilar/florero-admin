@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customize Your Flower Pot</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+</head>
+<body>
+  <h1>Customize Your Flower Pot</h1>
+
+  <form hx-post="/save-order" hx-target="body" hx-swap="innerHTML">
+    <div>
+      <label for="client_name">Your Name:</label>
+      <input type="text" id="client_name" name="client_name" required>
+    </div>
+
+    <h2>Select Colors for Each Part</h2>
+    <div class="parts-selection">
+      <% for (let i = 0; i < 25; i++) { %>
+        <div class="part-selection">
+          <label for="part_<%= i %>">Part <%= i + 1 %>:</label>
+          <select id="part_<%= i %>" name="color_spec[]">
+            <% colors.forEach(color => { %>
+              <option value="<%= color.cKey %>"><%= color.cName %> - <%= color.hex_code %></option>
+            <% }); %>
+          </select>
+        </div>
+      <% } %>
+    </div>
+
+    <button type="submit">Save Order</button>
+  </form>
+
+</body>
+</html>
+
