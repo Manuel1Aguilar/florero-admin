@@ -1,15 +1,22 @@
-<tr id="color-<%= color.id %>">
-  <td><%= color.cName %></td>
-  <td><%= color.cKey %></td>
-  <td><%= color.hex_code %></td>
-  <td>
+<tr id="color-<%= color.id %>" class="bg-white border-b hover:bg-gray-50 transition">
+  <td class="border border-gray-300 p-2"><%= color.cName %></td>
+  <td class="border border-gray-300 p-2"><%= color.cKey %></td>
+  <td class="border border-gray-300 p-2">
+    <div class="w-6 h-6 rounded-full" style="background-color: <%= color.hex_code %>;"></div>
+  </td>
+  <td class="border border-gray-300 p-2">
     <form id="update-stock-form-<%= color.id %>" hx-post="/admin/update-stock" hx-target="#color-<%= color.id %>" hx-swap="outerHTML">
       <input type="hidden" name="color_id" value="<%= color.id %>">
-      <input type="number" name="new_stock" min="0" value="<%= color.stock %>" required>
-      <button type="submit">Update</button>
+      <input type="number" name="new_stock" min="0" value="<%= color.stock %>" required class="w-16 p-1 border border-gray-300 rounded-md">
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Update
+      </button>
     </form>
   </td>
-  <td>
-    <button hx-post="/admin/delete-color" hx-target="#color-<%= color.id %>" hx-swap="outerHTML" hx-vals='{"color_id": "<%= color.id %>"}'>Delete</button>
+  <td class="border border-gray-300 p-2">
+    <button hx-post="/admin/delete-color" hx-target="#color-<%= color.id %>" hx-swap="outerHTML" hx-vals='{"color_id": "<%= color.id %>"}' class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 float-right">
+      Delete
+    </button>
   </td>
 </tr>
+

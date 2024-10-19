@@ -1,20 +1,17 @@
-<tr id="order-<%= order.id %>">
-  <td><%= order.id %></td>
-  <td><%= order.client_name %></td>
-  <td><%= order.order_code %></td>
-  <td><%= order.color_spec %></td>
-  <td><%= order.status %></td>
-  <td>
-    <% if (order.status === 'Pending') { %>
-      <button hx-post="/admin/confirm-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Confirm</button>
-      <button hx-post="/admin/deny-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Deny</button>
-    <% } %>
-  </td>
-  <td>
-      <button hx-post="/admin/delete-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>Delete</button>
-  </td>
-  <td>
-      <button hx-get="/admin/view-order/<%= order.id %>" hx-target="body" hx-swap="innerHTML">View Order</button>
-  </td>
-</tr>
-
+  <tr id="order-<%= order.id %>" class="bg-white border-b hover:bg-gray-50 transition">
+    <td class="border border-gray-300 p-2"><%= order.id %></td>
+    <td class="border border-gray-300 p-2"><%= order.client_name %></td>
+    <td class="border border-gray-300 p-2"><%= order.order_code %></td>
+    <td class="border border-gray-300 p-2"><%= order.color_spec %></td>
+    <td class="border border-gray-300 p-2"><%= order.status %></td>
+    <td class="border border-gray-300 p-2">
+      <div class="flex justify-end gap-2">
+        <% if (order.status === 'Pending') { %>
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" hx-post="/admin/confirm-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>✅</button>
+          <button class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" hx-post="/admin/deny-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>❌</button>
+        <% } %>
+        <button class="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" hx-post="/admin/delete-order" hx-target="#order-<%= order.id %>" hx-swap="outerHTML" hx-vals='{"order_id": "<%= order.id %>"}'>🗑️</button>
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" hx-get="/admin/view-order/<%= order.id %>" hx-target="#admin-content" hx-swap="innerHTML">👀</button>
+      </div>
+    </td>
+  </tr>

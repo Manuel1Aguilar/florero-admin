@@ -4,35 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customize Your Flower Pot</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
   <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vibrate.js/1.0.0/vibrate.min.js"></script>
+<script>
+  let isPainting = false;
+
+  function prepareOrderData() {
+    const colorSpecArray = [];
+    for (let i = 0; i < 25; i++) {
+      const stackPreview = document.getElementById(`stack-preview-${i}`);
+      const colorKey = stackPreview.getAttribute('data-ckey');
+      colorSpecArray.push(colorKey);
+    }
+    document.getElementById('color_spec').value = colorSpecArray.join('');
+  }
+
+  function startPainting() {
+    isPainting = true;
+  }
+
+  function stopPainting() {
+    isPainting = false;
+  }
+
+  function updateStock(colorKey, increment) {
+    const colorOption = document.querySelector(`#color_selector option[value="${colorKey}"]`);
+    if (colorOption) {
+      let currentStock = parseInt(colorOption.getAttribute('data-stock'), 10);
+      currentStock += increment;
+      colorOption.setAttribute('data-stock', currentStock);
+      colorOption.textContent = `${colorOption.textContent.split(':')[0]}: ${currentStock}`;
+
+      if (currentStock <= 0) {
+        colorOption.classList.add('text-red-600');
+        navigator.vibrate(200);
+      } else {
+        colorOption.classList.remove('text-red-600');
+      }
+    }
+  }
+
+  function applySelectedColor(index) {
+    const colorSelector = document.getElementById('color_selector');
+    const selectedOption = colorSelector.options[colorSelector.selectedIndex];
+    const hexCode = selectedOption.getAttribute('data-hex');
+    const colorKey = selectedOption.value;
+    const stackPreview = document.getElementById(`stack-preview-${index}`);
+    const previousColorKey = stackPreview.getAttribute('data-ckey');
+    let currentStock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+
+    // Update stock for previous color
+    if (previousColorKey) {
+      updateStock(previousColorKey, 1);
+    }
+
+    if (currentStock > 0) {
+      stackPreview.style.backgroundColor = hexCode;
+      stackPreview.setAttribute('data-ckey', colorKey);
+      updateStock(colorKey, -1);
+      colorSelector.classList.remove('text-red-600');
+    } else {
+      colorSelector.classList.add('text-red-600');
+      navigator.vibrate(200);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initial stock deduction for first color on load
+    const initialColorKey = document.querySelector('#color_selector option').value;
+    updateStock(initialColorKey, -25);
+  });
+
+  document.body.addEventListener('mouseup', stopPainting);
+  document.body.addEventListener('touchend', stopPainting);
+</script>
 </head>
-<body>
-  <h1>Customize Your Flower Pot</h1>
+<body class="container mx-auto py-2 bg-gray-100 text-gray-800">
+  <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">Customize Your Flower Pot 💐</h1>
 
-  <form hx-post="/save-order" hx-target="body" hx-swap="innerHTML">
-    <div>
-      <label for="client_name">Your Name:</label>
-      <input type="text" id="client_name" name="client_name" required>
+  <form hx-post="/save-order" hx-target="body" hx-swap="innerHTML" class="space-y-8 bg-white p-6 rounded-md shadow-md" onsubmit="prepareOrderData()">
+    <div class="flex flex-col space-y-2 mb-6">
+      <label for="client_name" class="text-lg font-semibold">Your Name:</label>
+      <input type="text" id="client_name" name="client_name" class="border border-gray-300 p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Enter your name" required>
     </div>
 
-    <h2>Select Colors for Each Part</h2>
-    <div class="parts-selection">
-      <% for (let i = 0; i < 25; i++) { %>
-        <div class="part-selection">
-          <label for="part_<%= i %>">Part <%= i + 1 %>:</label>
-          <select id="part_<%= i %>" name="color_spec[]">
-            <% colors.forEach(color => { %>
-              <option value="<%= color.cKey %>"><%= color.cName %> - <%= color.hex_code %></option>
-            <% }); %>
-          </select>
+    <h2 class="text-2xl font-semibold mt-8 mb-4 text-green-600">Select Color and Apply to Parts</h2>
+    <div class="flex flex-col md:flex-row gap-4 w-full max-h-screen items-start">
+      <div class="flex flex-col space-y-4">
+        <label for="color_selector" class="text-lg font-semibold">Select Color:</label>
+        <select id="color_selector" class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          <% colors.forEach(color => { %>
+            <option value="<%= color.cKey %>" data-hex="<%= color.hex_code %>" data-stock="<%= color.stock %>"><%= color.cName %>:<%= color.stock %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="flex flex-col items-center md:items-start w-full md:w-auto">
+        <div id="stack-preview" class="flex flex-col justify-between space-y-1 h-full max-h-[32rem] md:max-h-[38rem] w-1/2">
+          <% for (let i = 0; i < 25; i++) { %>
+          <div id="stack-preview-<%= i %>" class="w-full h-8 md:w-32 border border-gray-400 cursor-pointer" style="background-color: <%= colors[0].hex_code %>;" data-ckey="<%= colors[0].cKey %>"
+            onmousedown="startPainting(); applySelectedColor(<%= i %>)" onmouseup="stopPainting()" onmouseenter="if(isPainting) applySelectedColor(<%= i %>)"
+            ontouchstart="startPainting(); applySelectedColor(<%= i %>)" ontouchend="stopPainting()" ontouchmove="handleTouchMove(event)">
+          </div>
+          <% } %>
         </div>
-      <% } %>
+      </div>
+   <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 self-end md:ml-auto">
+      Save Order
+    </button>
     </div>
 
-    <button type="submit">Save Order</button>
+   
+    <input type="hidden" id="color_spec" name="color_spec">
   </form>
 
+  <script>
+    function handleTouchMove(event) {
+      event.preventDefault();
+      const touch = event.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (element && element.id.startsWith('stack-preview-')) {
+        const i = parseInt(element.id.split('-')[2], 10);
+      applySelectedColor(i);
+        applySelectedColor(i);
+      }
+    }
+
+    document.body.addEventListener('mouseup', stopPainting);
+    document.body.addEventListener('touchend', stopPainting);
+  </script>
 </body>
 </html>
 

@@ -1,55 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Manage Stock</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script src="https://unpkg.com/htmx.org@1.6.1"></script>
-</head>
-<body>
-  <% if (!authenticated) { %>
-    <script>
-      window.location.href = '/admin';
-    </script>
-  <% } %>
-  <h1>Manage Stock</h1>
+<h1 class="text-3xl font-bold mb-6 text-center text-blue-600">Manage Stock</h1>
 
-  <button id="add-color-button" hx-get="/admin/add-color-form" hx-target="#add-color-form" hx-swap="innerHTML">Add Color</button>
-  <div id="add-color-form"></div>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Color Name</th>
-        <th>Color Key</th>
-        <th>Hex Code</th>
-        <th>Stock</th>
+<div class="w-full mb-6">
+  <button id="add-color-button" onclick="toggleAddColorForm()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 float-left">
+    Add Color
+  </button>
+</div>
+
+<table class="w-full table-auto mb-6 border-collapse border border-gray-300 text-sm">
+  <thead>
+    <tr class="bg-gray-200">
+      <th class="border border-gray-300 p-2 text-left font-semibold">Color Name</th>
+      <th class="border border-gray-300 p-2 text-left font-semibold">Color Key</th>
+      <th class="border border-gray-300 p-2 text-left font-semibold">Color</th>
+      <th class="border border-gray-300 p-2 text-left font-semibold w-40">Stock</th>
+      <th class="border border-gray-300 p-2 text-left font-semibold">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% colors.forEach(color => { %>
+      <tr id="color-<%= color.id %>" class="bg-white border-b hover:bg-gray-50 transition">
+        <td class="border border-gray-300 p-2"><%= color.cName %></td>
+        <td class="border border-gray-300 p-2"><%= color.cKey %></td>
+        <td class="border border-gray-300 p-2">
+          <div class="w-6 h-6 rounded-full" style="background-color: <%= color.hex_code %>; float: left;"></div>
+        </td>
+        <td class="border border-gray-300 p-2">
+          <form id="update-stock-form-<%= color.id %>" hx-post="/admin/update-stock" hx-target="#color-<%= color.id %>" hx-swap="outerHTML" class="float-right">
+            <input type="hidden" name="color_id" value="<%= color.id %>">
+            <input type="number" name="new_stock" min="0" value="<%= color.stock %>" required class="w-16 p-1 border border-gray-300 rounded-md">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Update
+            </button>
+          </form>
+        </td>
+        <td class="border border-gray-300 p-2">
+          <button hx-post="/admin/delete-color" hx-target="#color-<%= color.id %>" hx-swap="outerHTML" hx-vals='{"color_id": "<%= color.id %>"}' class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-1 px-3 rounded-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 float-right">
+            Delete
+          </button>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      <% colors.forEach(color => { %>
-        <tr id="color-<%= color.id %>">
-          <td><%= color.cName %></td>
-          <td><%= color.cKey %></td>
-          <td><%= color.hex_code %></td>
-          </td>
-          <td>
-              <form id="update-stock-form-<%= color.id %>" hx-post="/admin/update-stock" hx-target="#color-<%= color.id %>" hx-swap="outerHTML">
-                <input type="hidden" name="color_id" value="<%= color.id %>">
-                <input type="number" name="new_stock" min="0" value="<%= color.stock %>" required>
-                <button type="submit">Update</button>
-              </form>
-          </td>
-          <td>
-              <button hx-post="/admin/delete-color" hx-target="#color-<%= color.id %>" hx-swap="outerHTML" hx-vals='{"color_id": "<%= color.id %>"}'>Delete</button>
-          </td>
-        </tr>
-      <% }); %>
-    </tbody>
-  </table>
+    <% }); %>
+  </tbody>
+</table>
 
-  <a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="body" hx-swap="innerHTML">Manage Orders</a>
-</body>
-</html>
+<div class="w-full">
+  <a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto float-right">Manage Orders</a>
+</div>
 
+<!-- Modal for Add Color Form -->
+<div id="add-color-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+  <div class="bg-white p-8 rounded-md shadow-lg w-full max-w-md mx-auto">
+    <h2 class="text-xl font-bold mb-4 text-center text-blue-600">Add Color</h2>
+    <div id="add-color-form-content"></div>
+  </div>
+</div>
+
+<script>
+  function toggleAddColorForm() {
+    const modal = document.getElementById('add-color-modal');
+    if (modal.classList.contains('hidden')) {
+      modal.classList.remove('hidden');
+      htmx.ajax('GET', '/admin/add-color-form', { target: '#add-color-form-content', swap: 'innerHTML' });
+    } else {
+      modal.classList.add('hidden');
+      document.getElementById('add-color-form-content').innerHTML = '';
+    }
+  }
+</script>

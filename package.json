@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "setup-db": "node db/dbSetup.js"
+    "setup-db": "node db/dbSetup.js",
+    "build:css": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/output.css --watch"
   },
   "keywords": [],
-  "author": "",
+  "author": "Manuel Aguilar",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -19,7 +20,10 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "autoprefixer": "^10.4.20",
+    "nodemon": "^3.1.7",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
   },
   "type": "module"
 }

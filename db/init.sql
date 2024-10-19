@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS colors (
     cName TEXT NOT NULL,
     cKey TEXT NOT NULL,
     hex_code TEXT NOT NULL,
-    stock INTEGER NOT NULL
+    stock INTEGER NOT NULL,
+    deleted INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS orders (

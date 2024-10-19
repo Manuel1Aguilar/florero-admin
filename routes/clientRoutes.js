@@ -12,7 +12,7 @@ const db = new sqlite3.Database(dbPath);
 
 // Client Page - Render customization form
 router.get('/', (_, res) => {
-    db.all('SELECT * FROM colors WHERE stock > 0', [], (err, colors) => {
+    db.all('SELECT * FROM colors WHERE stock > 0 AND deleted = 0', [], (err, colors) => {
         if (err) {
             res.status(500).send('Error fetching colors');
         } else {

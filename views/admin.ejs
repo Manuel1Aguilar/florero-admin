@@ -4,28 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
   <script src="https://unpkg.com/htmx.org@1.6.1"></script>
 </head>
-<body>
-  <div id="admin-content">
+<body class="bg-gray-100 text-gray-800 h-screen flex items-center justify-center">
+  <div id="admin-content" class="bg-white p-8 rounded-md shadow-md w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
     <% if (!authenticated) { %>
-      <h1>Admin Login</h1>
-      <form action="/admin/login" method="POST" hx-post="/admin/login" hx-target="#admin-content">
-        <div>
-          <label for="admin_password">Password:</label>
-          <input type="password" id="admin_password" name="admin_password" required>
-        </div>
-        <button type="submit">Login</button>
-      </form>
+      <div class="w-full max-w-xs">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">Admin Login</h1>
+        <form action="/admin/login" method="POST" hx-post="/admin/login" hx-target="#admin-content">
+          <div class="mb-4">
+            <label for="admin_password" class="block mb-2 font-semibold">Password:</label>
+            <input type="password" id="admin_password" name="admin_password" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Login
+          </button>
+        </form>
+      </div>
     <% } else { %>
-      <h2>Welcome, Admin!</h2>
-      <p>Select an action:</p>
-      <ul>
-        <li><a href="/admin/manage-stock" hx-get="/admin/manage-stock" hx-target="#admin-content" hx-swap="innerHTML">Manage Stock</a></li>
-        <li><a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="#admin-content" hx-swap="innerHTML">Manage Orders</a></li>
-      </ul>
+      <div class="w-full max-w-lg">
+        <h2 class="text-2xl font-bold mb-4 text-center text-green-600">Welcome, Admin!</h2>
+        <p class="mb-4 text-center">Select an action:</p>
+        <ul class="space-y-4">
+          <li>
+            <a href="/admin/manage-stock" hx-get="/admin/manage-stock" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Manage Stock
+            </a>
+          </li>
+          <li>
+            <a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Manage Orders
+            </a>
+          </li>
+        </ul>
+      </div>
     <% } %>
   </div>
 </body>
 </html>
+

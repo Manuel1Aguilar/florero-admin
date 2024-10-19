@@ -40,7 +40,7 @@ router.post('/admin/login', (req, res) => {
 
 // Admin page - Manage Stock 
 router.get('/admin/manage-stock', isAuthenticated, (_, res) => {
-    db.all('SELECT * FROM colors', [], (err, colors) => {
+    db.all('SELECT * FROM colors WHERE deleted = 0', [], (err, colors) => {
         if (err) {
             res.status(500).send('Error fetching stock data');
         } else {
@@ -161,7 +161,7 @@ router.post('/admin/confirm-order', isAuthenticated, (req, res) => {
                 Promise.all(updateStockPromises)
                     .then(() => {
                         // Update order status to Confirmed
-                        const confirmQuery = `UPDATE orders SET status = 'Confirmed' WHERE id = ?`;
+                        const confirmQuery = `UPDATE orders SET status = 'Confirmed', date_closed = datetime('now') WHERE id = ?`;
                         db.run(confirmQuery, [order_id], function (err) {
                             if (err) {
                                 db.run('ROLLBACK', () => {
@@ -207,7 +207,7 @@ router.post('/admin/confirm-order', isAuthenticated, (req, res) => {
 // Deny order - Handle order denial
 router.post('/admin/deny-order', isAuthenticated, (req, res) => {
     const { order_id } = req.body;
-    const query = `UPDATE orders SET status = 'DENIED' WHERE id = ?`;
+    const query = `UPDATE orders SET status = 'DENIED', date_closed = datetime('now') WHERE id = ?`;
     db.run(query, [order_id], function(err) {
         if (err) {
             res.status(500).send('Error denying order');
@@ -244,7 +244,7 @@ router.post('/admin/delete-color', isAuthenticated, (req, res) => {
         return res.status(400).send('Color ID is required to delete a color item.');
     }
 
-    const deleteQuery = `DELETE FROM colors WHERE id = ?`;
+    const deleteQuery = `UPDATE colors SET deleted = 1 WHERE id = ?`;
     db.run(deleteQuery, [color_id], function (err) {
         if (err) {
             console.error(err);
@@ -269,7 +269,6 @@ router.post('/admin/delete-order', isAuthenticated, (req, res) => {
             console.error(err);
             return res.status(500).send('Error deleting order');
         }
-        
         res.send(''); // Sending an empty response so the row is removed from the page
     });
 });
