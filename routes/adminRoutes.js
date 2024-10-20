@@ -77,23 +77,33 @@ router.post('/admin/update-stock', isAuthenticated, (req, res) => {
             }
         });
     } else {
-        // Insert new color
-        const insertQuery = `INSERT INTO colors (cName, cKey, hex_code, stock) VALUES (?, ?, ?, ?)`;
-        db.run(insertQuery, [cName, cKey, hex_code, new_stock], function (err) {
+        const checkQuery = `SELECT * FROM colors WHERE (cName = ? OR cKey = ?) AND deleted = 0`;
+        db.get(checkQuery, [cName, cKey], (err, existingColor) => {
             if (err) {
                 console.error(err);
-                res.status(500).send('Error adding new color');
+                res.status(500).send('Error checking existing color');
+            } else if (existingColor) {
+                res.status(400).send('El color ya existe');
             } else {
-                const newColorId = this.lastID;
-                db.get('SELECT * FROM colors WHERE id = ?', [newColorId], (err, newColor) => {
+                // Insert new color
+                const insertQuery = `INSERT INTO colors (cName, cKey, hex_code, stock) VALUES (?, ?, ?, ?)`;
+                db.run(insertQuery, [cName, cKey, hex_code, new_stock], function (err) {
                     if (err) {
-                        res.status(500).send('Error fetching new color');
+                        console.error(err);
+                        res.status(500).send('Error adding new color');
                     } else {
-                        res.render('partial/color_row', { color: newColor }, (err, html) => {
+                        const newColorId = this.lastID;
+                        db.get('SELECT * FROM colors WHERE id = ?', [newColorId], (err, newColor) => {
                             if (err) {
-                                res.status(500).send('Error rendering new color row');
+                                res.status(500).send('Error fetching new color');
                             } else {
-                                res.send(html);
+                                res.render('partial/color_row', { color: newColor }, (err, html) => {
+                                    if (err) {
+                                        res.status(500).send('Error rendering new color row');
+                                    } else {
+                                        res.send(html);
+                                    }
+                                });
                             }
                         });
                     }
@@ -314,6 +324,47 @@ router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
             res.render('order_detail', { order, stockComparison: null, authenticated: true });
         }
     });
+});
+
+router.get('/admin/order-colors/:orderId', (req, res) => {
+  const orderId = req.params.orderId;
+
+  // First, get the color_spec for the given order ID
+  db.get('SELECT color_spec FROM orders WHERE id = ?', [orderId], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!row) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const colorSpec = row.color_spec; // e.g., 'NNNYYRR'
+    const colorKeys = colorSpec.split(''); // Split to get individual color keys
+
+    // Use the IN clause to get all hex codes for the given color keys
+    const placeholders = colorKeys.map(() => '?').join(',');
+    const sql = `SELECT cKey, hex_code FROM colors WHERE cKey IN (${placeholders})`;
+
+    db.all(sql, colorKeys, (err, colors) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Create the HTML response by mapping over colorKeys and rendering each div
+      const colorBlocks = colorKeys.map((cKey, i) => {
+        const color = colors.find(color => color.cKey === cKey);
+        const hexCode = color ? color.hex_code : '#ffffff'; // default to white if not found
+        return `
+          <div id="stack-preview-${i}" class="w-full h-8 md:w-32 border border-gray-400 cursor-pointer" 
+               style="background-color: ${hexCode};" data-ckey="${cKey}">
+          </div>
+        `;
+      }).join('');
+
+      res.send(colorBlocks); // Send the HTML back
+    });
+  });
 });
 
 export default router;

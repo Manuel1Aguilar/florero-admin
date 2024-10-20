@@ -6,6 +6,15 @@
   <title>Admin Login</title>
   <link rel="stylesheet" href="/css/output.css">
   <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+  <script>
+    document.addEventListener('htmx:responseError', function(evt) {
+      if (evt.detail.xhr && evt.detail.xhr.responseText) {
+        alert('Error: ' + evt.detail.xhr.responseText);
+      } else {
+        alert('An unexpected error occurred.');
+      }
+    });
+  </script>
 </head>
 <body class="bg-gray-100 text-gray-800 h-screen flex items-center justify-center">
   <div id="admin-content" class="bg-white p-8 rounded-md shadow-md w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
