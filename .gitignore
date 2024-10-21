@@ -133,3 +133,6 @@ dist
 *~
 *.swp
 *.swo
+
+# Ignore the database
+db/florero.sqlite
