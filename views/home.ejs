@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Layout</title>
+  <title>Panel de Administración</title>
   <link rel="stylesheet" href="/css/output.css">
   <script src="https://unpkg.com/htmx.org@1.6.1"></script>
   <script>
@@ -11,7 +11,7 @@
       if (evt.detail.xhr && evt.detail.xhr.responseText) {
         alert('Error: ' + evt.detail.xhr.responseText);
       } else {
-        alert('An unexpected error occurred.');
+        alert('Ocurrió un error inesperado.');
       }
     });
 
@@ -53,7 +53,7 @@
       if (!nav.querySelector('.logout-button')) {
         const logoutButton = document.createElement('button');
         logoutButton.classList.add('logout-button', 'text-xl', 'text-red-600', 'hover:text-red-800', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500');
-        logoutButton.title = 'Logout';
+        logoutButton.title = 'Cerrar sesión';
         logoutButton.innerHTML = '🔑';
         logoutButton.onclick = handleLogout;
         nav.appendChild(logoutButton);
@@ -65,7 +65,7 @@
         const toggleButton = document.createElement('button');
         toggleButton.classList.add('toggle-button', 'text-xl', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
         toggleButton.onclick = toggleAdminClientContent;
-        toggleButton.title = 'Toggle Admin/Client View';
+        toggleButton.title = 'Cambiar entre vista de administración y cliente';
         toggleButton.innerHTML = '<span id="toggle-icon">🛒</span>';
         leftNav.appendChild(toggleButton);
       }
@@ -83,7 +83,7 @@
       if (!nav.querySelector('.login-button')) {
         const loginButton = document.createElement('button');
         loginButton.classList.add('login-button', 'text-xl', 'p-2', 'text-blue-600', 'hover:text-blue-800', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
-        loginButton.title = 'Login';
+        loginButton.title = 'Iniciar sesión';
         loginButton.onclick = loadAdminLogin;
         loginButton.innerHTML = '🔓';
         nav.appendChild(loginButton);
@@ -153,18 +153,18 @@
   <nav class="w-full shadow-md p-3 flex justify-between items-center fixed top-0 left-0 right-0 transition-transform duration-300 ease-in-out" style="height: 3rem; background: linear-gradient(to right, #e0f2ff, #b3d9ff);">
     <div class="nav-buttons left flex-grow">
       <% if (authenticated) { %>
-        <button class="toggle-button text-xl p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="toggleAdminClientContent()" title="Toggle Admin/Client View">
+        <button class="toggle-button text-xl p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="toggleAdminClientContent()" title="Cambiar entre vista de administración y cliente">
           <span id="toggle-icon">🛒</span>
         </button>
       <% } %>
     </div>
     <div class="nav-buttons right">
       <% if (authenticated) { %>
-        <button class="logout-button text-xl text-red-600 hover:text-red-800 p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout(event)" title="Logout">
+        <button class="logout-button text-xl text-red-600 hover:text-red-800 p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout(event)" title="Cerrar sesión">
           🔑
         </button>
       <% } else { %>
-        <button class="login-button text-xl p-2 text-blue-600 hover:text-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="loadAdminLogin()" title="Login">
+        <button class="login-button text-xl p-2 text-blue-600 hover:text-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="loadAdminLogin()" title="Iniciar sesión">
           🔓
         </button>
       <% } %>

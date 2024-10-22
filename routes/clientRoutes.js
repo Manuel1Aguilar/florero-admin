@@ -2,6 +2,9 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sqlite3 from 'sqlite3';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -13,6 +16,7 @@ const DATABASE_FILE = process.env.DATABASE_FILE || path.join(__dirname, 'data', 
 const getDatabaseConnection = () => {
   const db = new sqlite3.Database(DATABASE_FILE, (err) => {
     if (err) {
+      console.log(`DB Path: ${DATABASE_FILE}`);
       console.error('Failed to connect to the SQLite database', err);
     }
   });
