@@ -37,6 +37,11 @@ router.post('/admin/login', (req, res) => {
   }
 });
 
+// Admin logout
+router.get('/admin/logout', (req, res) => {
+    req.session.authenticated = false;
+    res.redirect('/');
+});
 
 // Admin page - Manage Stock 
 router.get('/admin/manage-stock', isAuthenticated, (_, res) => {

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Layout</title>
+  <link rel="stylesheet" href="/css/output.css">
+  <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+  <script>
+    document.addEventListener('htmx:responseError', function(evt) {
+      if (evt.detail.xhr && evt.detail.xhr.responseText) {
+        alert('Error: ' + evt.detail.xhr.responseText);
+      } else {
+        alert('An unexpected error occurred.');
+      }
+    });
+
+    // Function to load admin login page and handle authentication status
+    function loadAdminLogin() {
+      htmx.ajax('GET', '/admin', {
+        target: '#main-content',
+        swap: 'innerHTML'
+      });
+    }
+
+    // Function to handle logout and load the client page
+    function handleLogout(event) {
+      event.preventDefault(); // Prevent default link navigation
+      htmx.ajax('GET', '/client', {
+        target: '#main-content',
+        swap: 'innerHTML'
+      });
+      updateNavBarForUnauthenticatedUser();
+    }
+
+    // Function to update the navigation bar for authenticated user
+    function updateNavBarForAuthenticatedUser() {
+      const nav = document.querySelector('nav .nav-buttons');
+
+      if (!nav) return;
+
+      // Remove login button if it exists
+      const loginButton = nav.querySelector('.login-button');
+      if (loginButton) {
+        loginButton.remove();
+      }
+
+      // Add the toggle button if it doesn't already exist
+      if (!nav.querySelector('.toggle-button')) {
+        const toggleButton = document.createElement('button');
+        toggleButton.classList.add('toggle-button', 'text-xl', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
+        toggleButton.title = 'Toggle Admin/Client View';
+        toggleButton.onclick = toggleAdminClientContent;
+        toggleButton.innerHTML = '<span id="toggle-icon">🛒</span>';
+        nav.insertBefore(toggleButton, nav.firstChild);
+      }
+
+      // Add the logout button if it doesn't already exist
+      if (!nav.querySelector('.logout-button')) {
+        const logoutButton = document.createElement('a');
+        logoutButton.href = '/admin/logout';
+        logoutButton.classList.add('logout-button', 'text-xl', 'text-red-600', 'hover:text-red-800', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500');
+        logoutButton.title = 'Logout';
+        logoutButton.innerHTML = '🔑';
+        logoutButton.onclick = handleLogout;
+        nav.appendChild(logoutButton);
+      }
+    }
+
+    // Function to update the navigation bar for unauthenticated user
+    function updateNavBarForUnauthenticatedUser() {
+      const nav = document.querySelector('nav .nav-buttons');
+
+      // Remove toggle and logout buttons if they exist
+      const toggleButton = nav.querySelector('.toggle-button');
+      const logoutButton = nav.querySelector('.logout-button');
+      if (toggleButton) toggleButton.remove();
+      if (logoutButton) logoutButton.remove();
+
+      // Add the login button
+      if (!nav.querySelector('.login-button')) {
+        const loginButton = document.createElement('button');
+        loginButton.classList.add('login-button', 'text-xl', 'p-2', 'text-blue-600', 'hover:text-blue-800', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
+        loginButton.title = 'Login';
+        loginButton.onclick = loadAdminLogin;
+        loginButton.innerHTML = '🔓';
+        nav.appendChild(loginButton);
+      }
+    }
+
+    // Listen for the `htmx:afterRequest` event to update the navbar after every successful request
+    document.addEventListener('htmx:afterRequest', function(evt) {
+      if (evt.detail.successful) {
+        updateNavBarForAuthenticatedUser();
+      }
+    });
+
+    function toggleAdminClientContent() {
+      const mainContent = document.getElementById('main-content');
+      const toggleIcon = document.getElementById('toggle-icon');
+      htmx.ajax('GET', mainContent.classList.contains('client-view') ? '/admin' : '/client', {
+        target: '#main-content',
+        swap: 'innerHTML'
+      });
+      mainContent.classList.toggle('client-view');
+      toggleIcon.textContent = mainContent.classList.contains('client-view') ? '🛠️' : '🛒';
+    }
+
+    // Hide navbar on scroll down for mobile
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('nav');
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+      if (currentScroll > lastScrollTop) {
+        navbar.style.top = '-70px';
+      } else {
+        navbar.style.top = '0';
+      }
+      lastScrollTop = currentScroll;
+    });
+  </script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-gray-800 h-screen flex flex-col">
+  <nav class="w-full shadow-md p-3 flex justify-between items-center fixed top-0 left-0 right-0 transition-transform duration-300 ease-in-out" style="height: 3rem; background: linear-gradient(to right, #e0f2ff, #b3d9ff);">
+    <div class="nav-buttons flex-grow">
+      <% if (authenticated) { %>
+        <button class="toggle-button text-xl p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="toggleAdminClientContent()" title="Toggle Admin/Client View">
+          <span id="toggle-icon">🛒</span>
+        </button>
+      <% } %>
+    </div>
+    <div class="nav-buttons">
+      <% if (authenticated) { %>
+        <a href="/admin/logout" class="logout-button text-xl text-red-600 hover:text-red-800 p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout" title="Logout">
+          🔑
+        </a>
+      <% } else { %>
+        <button class="login-button text-xl p-2 text-blue-600 hover:text-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="loadAdminLogin()" title="Login">
+          🔓
+        </button>
+      <% } %>
+    </div>
+  </nav>
+  <div id="main-content" class="p-8 flex-grow mt-10">
+    <!-- Content will be loaded dynamically here -->
+  </div>
+</body>
+</html>
+

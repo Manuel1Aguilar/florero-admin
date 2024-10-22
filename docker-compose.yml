@@ -1,0 +1,14 @@
+services:
+  flowerpots-app:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - app-data:/app/data  # Persist the SQLite file
+    env_file:
+      - .env
+
+volumes:
+  app-data:
+    driver: local
+

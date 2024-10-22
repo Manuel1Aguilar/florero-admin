@@ -11,7 +11,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Determine __dirname since it is not available in ES modules
 const __filename = fileURLToPath(import.meta.url);

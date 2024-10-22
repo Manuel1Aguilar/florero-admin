@@ -8,11 +8,11 @@ const sqlite3 = sqlite.verbose();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.join(__dirname, 'florero.sqlite');
+const DATABASE_FILE = process.env.DATABASE_FILE || path.join(__dirname, 'data', 'florero.sqlite');
 const initSqlPath = path.join(__dirname, 'init.sql');
 
 // Open or create
-const db = new sqlite3.Database(dbPath, (err) => {
+const db = new sqlite3.Database(DATABASE_FILE, (err) => {
     if (err) {
         console.error('Error opening database: ', err.message);
         return;
