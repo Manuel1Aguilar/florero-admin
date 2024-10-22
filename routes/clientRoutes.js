@@ -7,14 +7,25 @@ const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '../db', 'florero.sqlite');
-const db = new sqlite3.Database(dbPath);
+
+const DATABASE_FILE = process.env.DATABASE_FILE || path.join(__dirname, 'data', 'florero.sqlite');
+
+const getDatabaseConnection = () => {
+  const db = new sqlite3.Database(DATABASE_FILE, (err) => {
+    if (err) {
+      console.error('Failed to connect to the SQLite database', err);
+    }
+  });
+  return db;
+};
+
 // Home page render
 router.get('/', (_, res) => {
     res.render('home');
 });
 // Client Page - Render customization form
 router.get('/client', (_, res) => {
+    const db = getDatabaseConnection();
     db.all('SELECT * FROM colors WHERE stock > 0 AND deleted = 0', [], (err, colors) => {
         if (err) {
             console.error(err);
@@ -27,6 +38,8 @@ router.get('/client', (_, res) => {
 
 // Save order - Handle submission
 router.post('/save-order', (req, res) => {
+    const db = getDatabaseConnection();
+
     const { client_name, color_spec } = req.body;
 
     let colorSpecString = '';
