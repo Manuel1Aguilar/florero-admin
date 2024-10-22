@@ -20,22 +20,26 @@
       htmx.ajax('GET', '/admin', {
         target: '#main-content',
         swap: 'innerHTML'
+      }).then(() => {
+        updateNavBarForAuthenticatedUser();
       });
     }
 
     // Function to handle logout and load the client page
     function handleLogout(event) {
       event.preventDefault(); // Prevent default link navigation
-      htmx.ajax('GET', '/client', {
+      htmx.ajax('GET', '/admin/logout', {
         target: '#main-content',
         swap: 'innerHTML'
+      }).then(() => {
+        updateNavBarForUnauthenticatedUser();
+        setDefaultClientView();
       });
-      updateNavBarForUnauthenticatedUser();
     }
 
     // Function to update the navigation bar for authenticated user
     function updateNavBarForAuthenticatedUser() {
-      const nav = document.querySelector('nav .nav-buttons');
+      const nav = document.querySelector('nav .nav-buttons.right');
 
       if (!nav) return;
 
@@ -45,39 +49,37 @@
         loginButton.remove();
       }
 
-      // Add the toggle button if it doesn't already exist
-      if (!nav.querySelector('.toggle-button')) {
-        const toggleButton = document.createElement('button');
-        toggleButton.classList.add('toggle-button', 'text-xl', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
-        toggleButton.title = 'Toggle Admin/Client View';
-        toggleButton.onclick = toggleAdminClientContent;
-        toggleButton.innerHTML = '<span id="toggle-icon">🛒</span>';
-        nav.insertBefore(toggleButton, nav.firstChild);
-      }
-
       // Add the logout button if it doesn't already exist
       if (!nav.querySelector('.logout-button')) {
-        const logoutButton = document.createElement('a');
-        logoutButton.href = '/admin/logout';
+        const logoutButton = document.createElement('button');
         logoutButton.classList.add('logout-button', 'text-xl', 'text-red-600', 'hover:text-red-800', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500');
         logoutButton.title = 'Logout';
         logoutButton.innerHTML = '🔑';
         logoutButton.onclick = handleLogout;
         nav.appendChild(logoutButton);
       }
+
+      // Add the toggle button to the left
+      const leftNav = document.querySelector('nav .nav-buttons.left');
+      if (!leftNav.querySelector('.toggle-button')) {
+        const toggleButton = document.createElement('button');
+        toggleButton.classList.add('toggle-button', 'text-xl', 'p-2', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
+        toggleButton.onclick = toggleAdminClientContent;
+        toggleButton.title = 'Toggle Admin/Client View';
+        toggleButton.innerHTML = '<span id="toggle-icon">🛒</span>';
+        leftNav.appendChild(toggleButton);
+      }
     }
 
     // Function to update the navigation bar for unauthenticated user
     function updateNavBarForUnauthenticatedUser() {
-      const nav = document.querySelector('nav .nav-buttons');
+      const nav = document.querySelector('nav .nav-buttons.right');
 
-      // Remove toggle and logout buttons if they exist
-      const toggleButton = nav.querySelector('.toggle-button');
+      // Remove logout button if it exists
       const logoutButton = nav.querySelector('.logout-button');
-      if (toggleButton) toggleButton.remove();
       if (logoutButton) logoutButton.remove();
 
-      // Add the login button
+      // Add the login button if it doesn't already exist
       if (!nav.querySelector('.login-button')) {
         const loginButton = document.createElement('button');
         loginButton.classList.add('login-button', 'text-xl', 'p-2', 'text-blue-600', 'hover:text-blue-800', 'transition-transform', 'transform', 'hover:scale-105', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
@@ -86,11 +88,16 @@
         loginButton.innerHTML = '🔓';
         nav.appendChild(loginButton);
       }
+
+      // Remove the toggle button if it exists
+      const leftNav = document.querySelector('nav .nav-buttons.left');
+      const toggleButton = leftNav.querySelector('.toggle-button');
+      if (toggleButton) toggleButton.remove();
     }
 
     // Listen for the `htmx:afterRequest` event to update the navbar after every successful request
     document.addEventListener('htmx:afterRequest', function(evt) {
-      if (evt.detail.successful) {
+      if (evt.detail.successful && evt.detail.path && evt.detail.path.includes('/admin')) {
         updateNavBarForAuthenticatedUser();
       }
     });
@@ -98,12 +105,29 @@
     function toggleAdminClientContent() {
       const mainContent = document.getElementById('main-content');
       const toggleIcon = document.getElementById('toggle-icon');
-      htmx.ajax('GET', mainContent.classList.contains('client-view') ? '/admin' : '/client', {
+      const targetView = mainContent.classList.contains('client-view') ? '/client' : '/admin';
+      htmx.ajax('GET', targetView, {
+        target: '#main-content',
+        swap: 'innerHTML'
+      }).then(() => {
+        mainContent.classList.toggle('client-view');
+        toggleIcon.textContent = mainContent.classList.contains('client-view') ? '🛒' : '🛠️';
+      });
+    }
+
+    function setDefaultClientView() {
+      const mainContent = document.getElementById('main-content');
+      htmx.ajax('GET', '/client', {
         target: '#main-content',
         swap: 'innerHTML'
       });
-      mainContent.classList.toggle('client-view');
-      toggleIcon.textContent = mainContent.classList.contains('client-view') ? '🛠️' : '🛒';
+      if (!mainContent.classList.contains('client-view')) {
+        mainContent.classList.add('client-view');
+      }
+      const toggleIcon = document.getElementById('toggle-icon');
+      if (toggleIcon) {
+        toggleIcon.textContent = '🛒';
+      }
     }
 
     // Hide navbar on scroll down for mobile
@@ -118,22 +142,27 @@
       }
       lastScrollTop = currentScroll;
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNavBarForUnauthenticatedUser();
+      setDefaultClientView();
+    });
   </script>
 </head>
 <body class="bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-gray-800 h-screen flex flex-col">
   <nav class="w-full shadow-md p-3 flex justify-between items-center fixed top-0 left-0 right-0 transition-transform duration-300 ease-in-out" style="height: 3rem; background: linear-gradient(to right, #e0f2ff, #b3d9ff);">
-    <div class="nav-buttons flex-grow">
+    <div class="nav-buttons left flex-grow">
       <% if (authenticated) { %>
         <button class="toggle-button text-xl p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="toggleAdminClientContent()" title="Toggle Admin/Client View">
           <span id="toggle-icon">🛒</span>
         </button>
       <% } %>
     </div>
-    <div class="nav-buttons">
+    <div class="nav-buttons right">
       <% if (authenticated) { %>
-        <a href="/admin/logout" class="logout-button text-xl text-red-600 hover:text-red-800 p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout" title="Logout">
+        <button class="logout-button text-xl text-red-600 hover:text-red-800 p-2 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout(event)" title="Logout">
           🔑
-        </a>
+        </button>
       <% } else { %>
         <button class="login-button text-xl p-2 text-blue-600 hover:text-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="loadAdminLogin()" title="Login">
           🔓
@@ -141,7 +170,7 @@
       <% } %>
     </div>
   </nav>
-  <div id="main-content" class="p-8 flex-grow mt-10">
+  <div id="main-content" class="p-8 flex-grow mt-10 client-view">
     <!-- Content will be loaded dynamically here -->
   </div>
 </body>

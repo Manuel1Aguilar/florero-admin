@@ -1,8 +1,9 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import sqlite3  from 'sqlite3';
+import sqlite3 from 'sqlite3';
 import dotenv from 'dotenv';
+import { get } from 'http';
 
 dotenv.config();
 
@@ -11,14 +12,22 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATABASE_FILE = process.env.DATABASE_FILE || path.join(__dirname, 'data', 'florero.sqlite');
-const db = new sqlite3.Database(DATABASE_FILE);
+
+const getDatabaseConnection = () => {
+  const db = new sqlite3.Database(DATABASE_FILE, (err) => {
+    if (err) {
+      console.error('Failed to connect to the SQLite database', err);
+    }
+  });
+  return db;
+};
 
 const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.authenticated) {
-        return next();
-    } else {
-        res.redirect('/admin');
-    }
+  if (req.session && req.session.authenticated) {
+    return next();
+  } else {
+    res.redirect('/admin');
+  }
 };
 
 router.get('/admin', (req, res) => {
@@ -39,197 +48,221 @@ router.post('/admin/login', (req, res) => {
 
 // Admin logout
 router.get('/admin/logout', (req, res) => {
-    req.session.authenticated = false;
-    res.redirect('/');
+  req.session.authenticated = false;
+  res.redirect('/');
 });
 
 // Admin page - Manage Stock 
 router.get('/admin/manage-stock', isAuthenticated, (_, res) => {
-    db.all('SELECT * FROM colors WHERE deleted = 0', [], (err, colors) => {
-        if (err) {
-            res.status(500).send('Error fetching stock data');
-        } else {
-            res.render('manage-stock', { colors, authenticated: true });
-        }
-    });
+  const db = getDatabaseConnection();
+  db.all('SELECT * FROM colors WHERE deleted = 0', [], (err, colors) => {
+    if (err) {
+      console.error('Error fetching stock data', err);
+      res.status(500).send('Error fetching stock data');
+    } else {
+      res.render('manage-stock', { colors, authenticated: true });
+    }
+    db.close();
+  });
 });
 
 // Update stock - Handle stock updates or create new color
 router.post('/admin/update-stock', isAuthenticated, (req, res) => {
-    const { color_id, cName, cKey, hex_code, new_stock } = req.body;
+  const db = getDatabaseConnection();
+  const { color_id, cName, cKey, hex_code, new_stock } = req.body;
 
-    if (color_id) {
-        // Update existing color stock
-        const updateQuery = `UPDATE colors SET stock = ? WHERE id = ?`;
-        db.run(updateQuery, [new_stock, color_id], function (err) {
-            if (err) {
-                console.error(err);
-                res.status(500).send('Error updating color');
-            } else {
-                db.get('SELECT * FROM colors WHERE id = ?', [color_id], (err, updatedColor) => {
-                    if (err) {
-                        res.status(500).send('Error fetching updated color');
-                    } else {
-                        res.render('partial/color_row', { color: updatedColor }, (err, html) => {
-                            if (err) {
-                                res.status(500).send('Error rendering updated row');
-                            } else {
-                                res.send(html);
-                            }
-                        });
-                    }
-                });
-            }
+  if (color_id) {
+    // Update existing color stock
+    const updateQuery = `UPDATE colors SET stock = ? WHERE id = ?`;
+    db.run(updateQuery, [new_stock, color_id], function (err) {
+      if (err) {
+        console.error('Error updating color', err);
+        res.status(500).send('Error updating color');
+      } else {
+        db.get('SELECT * FROM colors WHERE id = ?', [color_id], (err, updatedColor) => {
+          if (err) {
+            console.error('Error fetching updated color', err);
+            res.status(500).send('Error fetching updated color');
+          } else {
+            res.render('partial/color_row', { color: updatedColor }, (err, html) => {
+              if (err) {
+                console.error('Error rendering updated row', err);
+                res.status(500).send('Error rendering updated row');
+              } else {
+                res.send(html);
+              }
+            });
+          }
+          db.close();
         });
-    } else {
-        const checkQuery = `SELECT * FROM colors WHERE (cName = ? OR cKey = ?) AND deleted = 0`;
-        db.get(checkQuery, [cName, cKey], (err, existingColor) => {
-            if (err) {
-                console.error(err);
-                res.status(500).send('Error checking existing color');
-            } else if (existingColor) {
-                res.status(400).send('El color ya existe');
-            } else {
-                // Insert new color
-                const insertQuery = `INSERT INTO colors (cName, cKey, hex_code, stock) VALUES (?, ?, ?, ?)`;
-                db.run(insertQuery, [cName, cKey, hex_code, new_stock], function (err) {
-                    if (err) {
-                        console.error(err);
-                        res.status(500).send('Error adding new color');
-                    } else {
-                        const newColorId = this.lastID;
-                        db.get('SELECT * FROM colors WHERE id = ?', [newColorId], (err, newColor) => {
-                            if (err) {
-                                res.status(500).send('Error fetching new color');
-                            } else {
-                                res.render('partial/color_row', { color: newColor }, (err, html) => {
-                                    if (err) {
-                                        res.status(500).send('Error rendering new color row');
-                                    } else {
-                                        res.send(html);
-                                    }
-                                });
-                            }
-                        });
-                    }
+      }
+    });
+  } else {
+    const checkQuery = `SELECT * FROM colors WHERE (cName = ? OR cKey = ?) AND deleted = 0`;
+    db.get(checkQuery, [cName, cKey], (err, existingColor) => {
+      if (err) {
+        console.error('Error checking existing color', err);
+        res.status(500).send('Error checking existing color');
+        db.close();
+      } else if (existingColor) {
+        res.status(400).send('El color ya existe');
+        db.close();
+      } else {
+        // Insert new color
+        const insertQuery = `INSERT INTO colors (cName, cKey, hex_code, stock) VALUES (?, ?, ?, ?)`;
+        db.run(insertQuery, [cName, cKey, hex_code, new_stock], function (err) {
+          if (err) {
+            console.error('Error adding new color', err);
+            res.status(500).send('Error adding new color');
+          } else {
+            const newColorId = this.lastID;
+            db.get('SELECT * FROM colors WHERE id = ?', [newColorId], (err, newColor) => {
+              if (err) {
+                console.error('Error fetching new color', err);
+                res.status(500).send('Error fetching new color');
+              } else {
+                res.render('partial/color_row', { color: newColor }, (err, html) => {
+                  if (err) {
+                    console.error('Error rendering new color row', err);
+                    res.status(500).send('Error rendering new color row');
+                  } else {
+                    res.send(html);
+                  }
                 });
-            }
+              }
+              db.close();
+            });
+          }
         });
-    }
+      }
+    });
+  }
 });
-
 
 // Admin page - Manage Orders 
 router.get('/admin/manage-orders', isAuthenticated, (_, res) => {
-    db.all('SELECT * FROM orders', [], (err, orders) => {
-        if (err) {
-            res.status(500).send('Error fetching orders');
-        } else {
-            res.render('manage-orders', { orders, authenticated: true });
-        }
-    });
+  const db = getDatabaseConnection();
+  db.all('SELECT * FROM orders', [], (err, orders) => {
+    if (err) {
+      console.error('Error fetching orders', err);
+      res.status(500).send('Error fetching orders');
+    } else {
+      res.render('manage-orders', { orders, authenticated: true });
+    }
+    db.close();
+  });
 });
 
 // Confirm Order - Handle order confirmation and update stock
 router.post('/admin/confirm-order', isAuthenticated, (req, res) => {
-    const { order_id } = req.body;
+  const db = getDatabaseConnection();
+  const { order_id } = req.body;
 
-    db.serialize(() => {
-        db.run('BEGIN TRANSACTION', (err) => {
-            if (err) {
-                return res.status(500).send('Error starting transaction.');
-            }
+  db.serialize(() => {
+    db.run('BEGIN TRANSACTION', (err) => {
+      if (err) {
+        console.error('Error starting transaction', err);
+        return res.status(500).send('Error starting transaction.');
+      }
 
-            // Fetch order details
-            db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, order) => {
-                if (err || !order) {
-                    db.run('ROLLBACK', () => {
-                        return res.status(500).send('Error fetching order details.');
-                    });
-                    return;
-                }
+      // Fetch order details
+      db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, order) => {
+        if (err || !order) {
+          console.error('Error fetching order details', err);
+          db.run('ROLLBACK', () => {
+            return res.status(500).send('Error fetching order details.');
+          });
+          return;
+        }
 
-                const colorSpec = order.color_spec;
-                const colorCounts = {};
+        const colorSpec = order.color_spec;
+        const colorCounts = {};
 
-                // Calculate the count of each color in the colorSpec
-                for (const cKey of colorSpec) {
-                    colorCounts[cKey] = (colorCounts[cKey] || 0) + 1;
-                }
+        // Calculate the count of each color in the colorSpec
+        for (const cKey of colorSpec) {
+          colorCounts[cKey] = (colorCounts[cKey] || 0) + 1;
+        }
 
-                // Update stock for each color
-                const updateStockPromises = Object.entries(colorCounts).map(([cKey, count]) => {
-                    return new Promise((resolve, reject) => {
-                        const updateQuery = `UPDATE colors SET stock = stock - ? WHERE cKey = ? AND stock >= ?`;
-                        db.run(updateQuery, [count, cKey, count], function (err) {
-                            if (err) {
-                                reject(`Error updating stock for color ${cKey}`);
-                            } else if (this.changes == 0) {
-                                reject(`Insufficient stock for color ${cKey}`);
-                            } else {
-                                resolve();
-                            }
-                        });
-                    });
-                });
-
-                Promise.all(updateStockPromises)
-                    .then(() => {
-                        // Update order status to Confirmed
-                        const confirmQuery = `UPDATE orders SET status = 'Confirmed', date_closed = datetime('now') WHERE id = ?`;
-                        db.run(confirmQuery, [order_id], function (err) {
-                            if (err) {
-                                db.run('ROLLBACK', () => {
-                                    return res.status(500).send('Error confirming order');
-                                });
-                            } else {
-                                db.run('COMMIT', (commitErr) => {
-                                    if (commitErr) {
-                                        return res.status(500).send('Error committing transaction.');
-                                    }
-                                });
-                                // Fetch the updated order details after commit
-                                db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, updatedOrder) => {
-                                    if (err) {
-                                        return res.status(500).send('Error fetching updated order after commit.');
-                                    }
-
-                                    // Render the updated row after the transaction has successfully committed
-                                    res.render('partial/order_row', { order: updatedOrder }, (err, html) => {
-                                        if (err) {
-                                            console.error(err);
-                                            res.status(500).send('Error rendering order row.');
-                                        } else {
-                                            res.send(html);
-                                        }
-                                    });
-                                });
-                            }
-                        });
-                    })
-                    .catch((error) => {
-                        db.run('ROLLBACK', () => {
-                            res.status(500).send(error);
-                        });
-                    });
+        // Update stock for each color
+        const updateStockPromises = Object.entries(colorCounts).map(([cKey, count]) => {
+          return new Promise((resolve, reject) => {
+            const updateQuery = `UPDATE colors SET stock = stock - ? WHERE cKey = ? AND stock >= ?`;
+            db.run(updateQuery, [count, cKey, count], function (err) {
+              if (err) {
+                console.error(`Error updating stock for color ${cKey}`, err);
+                reject(`Error updating stock for color ${cKey}`);
+              } else if (this.changes == 0) {
+                reject(`Insufficient stock for color ${cKey}`);
+              } else {
+                resolve();
+              }
             });
+          });
         });
+
+        Promise.all(updateStockPromises)
+          .then(() => {
+            // Update order status to Confirmed
+            const confirmQuery = `UPDATE orders SET status = 'Confirmed', date_closed = datetime('now') WHERE id = ?`;
+            db.run(confirmQuery, [order_id], function (err) {
+              if (err) {
+                console.error('Error confirming order', err);
+                db.run('ROLLBACK', () => {
+                  return res.status(500).send('Error confirming order');
+                });
+              } else {
+                db.run('COMMIT', (commitErr) => {
+                  if (commitErr) {
+                    console.error('Error committing transaction', commitErr);
+                    return res.status(500).send('Error committing transaction.');
+                  }
+                });
+                // Fetch the updated order details after commit
+                db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, updatedOrder) => {
+                  if (err) {
+                    console.error('Error fetching updated order after commit', err);
+                    return res.status(500).send('Error fetching updated order after commit.');
+                  }
+
+                  // Render the updated row after the transaction has successfully committed
+                  res.render('partial/order_row', { order: updatedOrder }, (err, html) => {
+                    if (err) {
+                      console.error('Error rendering order row', err);
+                      res.status(500).send('Error rendering order row.');
+                    } else {
+                      res.send(html);
+                    }
+                  });
+                });
+              }
+              db.close();
+            });
+          })
+          .catch((error) => {
+            console.error('Error during stock update', error);
+            db.run('ROLLBACK', () => {
+              res.status(500).send(error);
+            });
+            db.close();
+          });
+      });
     });
-
+  });
 });
-
 
 // Deny order - Handle order denial
 router.post('/admin/deny-order', isAuthenticated, (req, res) => {
+    const db = getDatabaseConnection();
     const { order_id } = req.body;
     const query = `UPDATE orders SET status = 'DENIED', date_closed = datetime('now') WHERE id = ?`;
     db.run(query, [order_id], function(err) {
         if (err) {
+            console.log(err);
             res.status(500).send('Error denying order');
         } else {
             db.get('SELECT * FROM orders WHERE id = ?', [order_id], (err, order) => {
                 if (err || !order) {
-                    console.error(`Error fetching order with id: ${order_id}`);
+                    console.error(`Error fetching order with id: ${order_id},\n Error: ${err}`);
                     res.status(500).send('Error fetching updated order');
                 } else {
                     res.render('partial/order_row', { order }, (err, html) => {
@@ -253,6 +286,7 @@ router.get('/admin/add-color-form', (_, res) => {
 
 // Delete stock - Handle deletion of a color
 router.post('/admin/delete-color', isAuthenticated, (req, res) => {
+    const db = getDatabaseConnection();
     const { color_id } = req.body;
     
     if (!color_id) {
@@ -272,6 +306,7 @@ router.post('/admin/delete-color', isAuthenticated, (req, res) => {
 
 // Delete order - Handle deletion of an order
 router.post('/admin/delete-order', isAuthenticated, (req, res) => {
+    const db = getDatabaseConnection();
     const { order_id } = req.body;
     
     if (!order_id) {
@@ -290,10 +325,12 @@ router.post('/admin/delete-order', isAuthenticated, (req, res) => {
 
 // View Order - Render the order details view
 router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
+    const db = getDatabaseConnection();
     const { orderId } = req.params;
 
     db.get('SELECT * FROM orders WHERE id = ?', [orderId], (err, order) => {
         if (err || !order) {
+            console.log(err);
             return res.status(500).send('Error fetching order details.');
         }
 
@@ -311,6 +348,7 @@ router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
 
             db.all('SELECT * FROM colors WHERE cKey IN (' + colorKeys.map(() => '?').join(',') + ')', colorKeys, (err, colors) => {
                 if (err) {
+                    console.log(err);
                     return res.status(500).send('Error fetching stock data.');
                 }
 
@@ -332,15 +370,18 @@ router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
 });
 
 router.get('/admin/order-colors/:orderId', (req, res) => {
+  const db = getDatabaseConnection();
   const orderId = req.params.orderId;
 
   // First, get the color_spec for the given order ID
   db.get('SELECT color_spec FROM orders WHERE id = ?', [orderId], (err, row) => {
     if (err) {
+      console.log(err);
       return res.status(500).json({ error: 'Database error' });
     }
 
     if (!row) {
+      console.log("Order not found");
       return res.status(404).json({ error: 'Order not found' });
     }
 
@@ -353,6 +394,7 @@ router.get('/admin/order-colors/:orderId', (req, res) => {
 
     db.all(sql, colorKeys, (err, colors) => {
       if (err) {
+        console.log(err);
         return res.status(500).json({ error: 'Database error' });
       }
 
@@ -373,3 +415,4 @@ router.get('/admin/order-colors/:orderId', (req, res) => {
 });
 
 export default router;
+
