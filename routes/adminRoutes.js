@@ -10,8 +10,8 @@ const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '../db', 'florero.sqlite');
-const db = new sqlite3.Database(dbPath);
+const DATABASE_FILE = process.env.DATABASE_FILE || path.join(__dirname, 'data', 'florero.sqlite');
+const db = new sqlite3.Database(DATABASE_FILE);
 
 const isAuthenticated = (req, res, next) => {
     if (req.session && req.session.authenticated) {

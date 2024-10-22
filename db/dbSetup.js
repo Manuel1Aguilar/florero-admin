@@ -2,7 +2,9 @@ import sqlite from 'sqlite3';
 import fs from 'fs';
 import path from 'path'
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const sqlite3 = sqlite.verbose();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +16,7 @@ const initSqlPath = path.join(__dirname, 'init.sql');
 // Open or create
 const db = new sqlite3.Database(DATABASE_FILE, (err) => {
     if (err) {
+        console.log(`DatabaseFile: ${DATABASE_FILE}`);
         console.error('Error opening database: ', err.message);
         return;
     }
