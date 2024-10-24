@@ -15,3 +15,10 @@ CREATE TABLE IF NOT EXISTS orders (
     date_closed TEXT,
     status TEXT DEFAULT 'Pending'
 );
+
+CREATE TABLE IF NOT EXISTS media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    description TEXT,
+    type TEXT NOT NULL
+);

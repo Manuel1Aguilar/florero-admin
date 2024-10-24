@@ -1,11 +1,37 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sqlite3 from 'sqlite3';
 import dotenv from 'dotenv';
-import { get } from 'http';
+import multer from 'multer';
 
 dotenv.config();
+
+const storage = multer.diskStorage({
+    destination: (_, __, cb) => {
+        cb(null, process.env.MEDIA_UPLOAD_PATH);
+    },
+    filename: (_, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (_, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif|mp4/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images and videos are allowed.'));
+    }
+  }
+});
+
 
 const router = express.Router();
 
@@ -283,7 +309,10 @@ router.post('/admin/deny-order', isAuthenticated, (req, res) => {
 router.get('/admin/add-color-form', (_, res) => {
     res.render('add-color-form');
 });
-
+// Serve the add media form
+router.get('/admin/add-media-form', (_, res) => {
+    res.render('partial/add-media-form');
+});
 // Delete stock - Handle deletion of a color
 router.post('/admin/delete-color', isAuthenticated, (req, res) => {
     const db = getDatabaseConnection();
@@ -414,5 +443,97 @@ router.get('/admin/order-colors/:orderId', (req, res) => {
   });
 });
 
-export default router;
+router.get('/admin/manage-media', isAuthenticated, (_, res) => {
+    const db = getDatabaseConnection();
 
+    const selectQuery = `SELECT * FROM media`;
+    db.all(selectQuery, (err, mediaList) => {
+        if (err) {
+            console.error(`Error getting media: ${err}`);
+            return res.status(500).json({ message: 'Error getting media' });
+        } else {
+            res.render('partial/manage-media', { mediaList, authenticated: true });
+        }
+        db.close();
+    });
+});
+    
+router.post('/admin/add-media', upload.single('media'), (req, res) => {
+    const { description, type } = req.body;
+
+    // Check if req.file exists (ensure the file was uploaded successfully)
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const mediaPath = `/media/${req.file.filename}`;
+    const db = getDatabaseConnection();
+
+    const insertQuery = `INSERT INTO media(path, type, description) VALUES (?, ?, ?)`;
+    
+    db.run(insertQuery, [mediaPath, type, description], function (error) {
+        if (error) {
+            console.error(`Error inserting media: ${error}`);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        // After the insertion, fetch the new media row by ID (this.lastID gives the inserted row ID)
+        const newMediaId = this.lastID;
+
+        db.get('SELECT * FROM media WHERE id = ?', [newMediaId], (err, newMedia) => {
+            if (err) {
+                console.error(`Error fetching new media: ${err}`);
+                return res.status(500).json({ error: 'Error fetching new media' });
+            }
+
+            // Render the media_row partial with the new media data
+            res.render('partial/media_row', { media: newMedia }, (err, html) => {
+                if (err) {
+                    console.error(`Error rendering media row: ${err}`);
+                    return res.status(500).json({ error: 'Error rendering media row' });
+                }
+
+                // Return the rendered partial HTML
+                res.send(html);
+            });
+        });
+    });
+});
+
+
+router.post('/admin/delete-media/', async (req, res) => {
+    const { media_id } = req.body;
+
+    const db = getDatabaseConnection();
+
+    db.all(`SELECT * FROM media WHERE id = ?`, [ media_id ], (err, media) => {
+        if (err) {
+            console.error(`Error getting media: ${err}`);
+            return res.status(500).json({ error: `Database error` });
+        }
+        if (!media) {
+            return res.status(500).json({ error: `Media not found` });
+        }
+        const mediaPath = path.join(process.env.MEDIA_UPLOAD_PATH, path.basename(media[0].path));
+
+        fs.unlink(mediaPath, (err) => {
+            if (err) {
+                console.error(`Error unlinking file: ${err}`);
+                return res.status(500).json({ message: 'Error deleting media file' });
+            } else {
+                const deleteQuery = `DElETE FROM media WHERE id = ?`;
+                db.run(deleteQuery, [ media_id ], (err) => {
+                    if (err) {
+                        console.error(`Error deleting row ${id}: ${err}`);
+                        return res.status(500).json({ message: 'Error deleting media row' });
+                    } else {
+                        res.send('');
+                    }
+                });
+            }
+        });
+
+    });
+});
+
+export default router;

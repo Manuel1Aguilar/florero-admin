@@ -63,6 +63,18 @@ router.post('/save-order', (req, res) => {
             res.status(500).send('Error saving order.');
         } else {
             res.render('order_confirmation', { client_name, order_code });
+       }
+    });
+});
+
+router.get('/get-examples', (_, res) => {
+    const db = getDatabaseConnection();
+    db.all(`SELECT * FROM media`, [], (err, mediaList) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error getting media');
+        } else {
+            res.render('partial/examples-modal', { mediaList });
         }
     });
 });

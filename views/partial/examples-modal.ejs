@@ -1,0 +1,67 @@
+<div id="carousel" class="relative w-full max-w-3xl mx-auto h-[30rem] mb-8" data-carousel="slide">
+  <!-- Title -->
+  <h2 class="text-center text-2xl font-bold text-gray-700 mb-4">Referencias</h2>
+
+  <!-- Carousel wrapper -->
+  <div id="carousel-inner" class="relative h-full overflow-hidden rounded-lg h-[90%]">
+    <% mediaList.forEach((media, index) => { %>
+      <div class="carousel-item <%= index === 0 ? 'block' : 'hidden' %> duration-700 ease-in-out absolute inset-0 w-full h-[90%] transition-opacity flex flex-col items-center justify-center" data-carousel-item>
+        <% if (media.type === 'image') { %>
+          <img src="<%= media.path %>" alt="<%= media.description %>" class="max-w-full max-h-full object-contain mx-auto my-auto">
+        <% } else if (media.type === 'video') { %>
+          <video controls class="max-w-full max-h-full object-contain mx-auto my-auto">
+            <source src="<%= media.path %>" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        <% } %>
+      <p class="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300 text-center max-w-lg px-4">
+        <%= media.description %>
+      </p>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Slider controls -->
+  <button type="button" class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-stone-400 dark:bg-gray-800/30 group-hover:bg-stone-600 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+      <svg class="w-6 h-6 text-white dark:text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+      </svg>
+      <span class="sr-only">Previous</span>
+    </span>
+  </button>
+  <button type="button" class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-stone-400 dark:bg-gray-800/30 group-hover:bg-stone-600 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+      <svg class="w-6 h-6 text-white dark:text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+      </svg>
+      <span class="sr-only">Next</span>
+    </span>
+  </button>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.carousel-item');
+  
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('block', i === index);
+      slide.classList.toggle('hidden', i !== index);
+    });
+  }
+
+  document.querySelector('[data-carousel-prev]').addEventListener('click', () => {
+    currentSlide = (currentSlide === 0) ? slides.length - 1 : currentSlide - 1;
+    showSlide(currentSlide);
+  });
+
+  document.querySelector('[data-carousel-next]').addEventListener('click', () => {
+    currentSlide = (currentSlide === slides.length - 1) ? 0 : currentSlide + 1;
+    showSlide(currentSlide);
+  });
+
+  // Initialize first slide
+  showSlide(currentSlide);
+</script>
+

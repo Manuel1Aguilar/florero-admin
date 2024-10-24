@@ -1,27 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmation</title>
-  <link rel="stylesheet" href="/css/output.css">
-</head>
-<body class="container mx-auto py-10 bg-gray-100 text-gray-800">
+<div class="container mx-auto p-10 bg-gray-100 text-gray-800">
   <div class="bg-white p-8 rounded-md shadow-md">
-    <h1 class="text-3xl font-bold mb-4 text-center text-green-600">Order Confirmation 🌸</h1>
+    <h1 class="text-3xl font-bold mb-4 text-center text-green-600">Confirmación de Pedido 🌸</h1>
 
     <div id="confirmation-message" class="text-lg mb-6">
-      <p class="mb-4 text-center">Thank you, <span class="font-semibold"><%= client_name %></span>! Your order has been successfully submitted.</p>
-      <p class="text-center">Your order code is: <strong class="text-blue-600"><%= order_code %></strong></p>
-      <p class="mt-4 text-center">Please keep this code for your records.</p>
-    </div>
-
-    <div class="text-center mt-8">
-      <a href="/" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        Return to Home
-      </a>
+      <p class="mb-4 text-center">Gracias, <span class="font-semibold"><%= client_name %></span>! Tu pedido ha sido enviado con éxito.</p>
+      <p class="text-center">El código de tu pedido es: <strong class="text-blue-600"><%= order_code %></strong></p>
+      <p class="mt-4 text-center">Por favor, guarda este código para tus registros.</p>
     </div>
   </div>
-</body>
-</html>
+</div>
 

@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 // Middleware for parsing form data
 app.use(express.urlencoded({ extended: true }));
 
+// Serve the media folder
+app.use('/media', express.static(process.env.MEDIA_UPLOAD_PATH));
+
 // Set up session management
 app.use(session({
   secret: process.env.SESSION_SECRET || 'defaultsecret',
