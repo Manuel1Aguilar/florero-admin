@@ -16,20 +16,28 @@
             <% }); %>
           </select>
         </div>
-        <div class="flex flex-col items-center md:items-center w-full md:w-1/5 mx-auto">
-          <div id="stack-preview" class="flex flex-col justify-between space-y-1 w-full">
-            <% for (let i = 0; i < 25; i++) { %>
-            <div id="stack-preview-<%= i %>" class="w-full h-[1.4rem] border border-gray-400 cursor-pointer mx-auto" style="background-color: <%= colors[0].hex_code %>;" data-ckey="<%= colors[0].cKey %>"
-              onmousedown="startPainting(); applySelectedColor(<%= i %>)" onmouseup="stopPainting()" onmouseenter="if(isPainting) applySelectedColor(<%= i %>)"
-              ontouchstart="startPainting(); applySelectedColor(<%= i %>)" ontouchend="stopPainting()" ontouchmove="handleTouchMove(event)">
-            </div>
-            <% } %>
-          </div>
-        </div>
-      </div>
-      <div class="flex w-full justify-between items-center mt-4">
-        <button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="openExampleModal()">Ver ejemplos</button>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">Guardar pedido</button>
+        <div class="flex flex-col items-center md:items-center w-full md:w-1/4 mx-auto">
+<div id="stack-preview" class="flex flex-col justify-between space-y-1 w-full">
+  <!-- Stack sides with perspective -->
+  <% for (let i = 0; i < 25; i++) { %>
+    <div id="stack-preview-<%= i %>" 
+      class="disk-side mx-auto cursor-pointer w-1/2"
+      style="
+        background-color: <%= colors[0].hex_code %>;
+        height: 1.4rem;
+        transform: perspective(400px) rotateX(45deg);
+        margin-top: -2px;
+      "
+      data-ckey="<%= colors[0].cKey %>"
+      onmousedown="startPainting(); applySelectedColor(<%= i %>)"
+      onmouseup="stopPainting()"
+      onmouseenter="if(isPainting) applySelectedColor(<%= i %>)"
+      ontouchstart="startPainting(); applySelectedColor(<%= i %>)"
+      ontouchend="stopPainting()"
+      ontouchmove="handleTouchMove(event)">
+    </div>
+  <% } %>
+</div>
       </div>
       <input type="hidden" id="color_spec" name="color_spec">
     </form>
@@ -38,6 +46,10 @@
   <% } %>
 </div>
 <div>
+<div class="flex w-full px-2 justify-between items-center mt-4">
+<button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="openExampleModal()">Ver ejemplos</button>
+<button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">Guardar pedido</button>
+</div>
 <div id="general-modal" class="fixed inset-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50" style="display:none;">
   <div class="bg-white p-6 rounded-md shadow-md w-1/2">
     <div id="general-modal-content" class="mb-6"></div>

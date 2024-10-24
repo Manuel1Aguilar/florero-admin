@@ -660,6 +660,10 @@ video {
   float: left;
 }
 
+.m-auto {
+  margin: auto;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -790,6 +794,30 @@ video {
   height: 75%;
 }
 
+.h-\[40\%\] {
+  height: 40%;
+}
+
+.h-\[2\.5rem\] {
+  height: 2.5rem;
+}
+
+.h-\[3rem\] {
+  height: 3rem;
+}
+
+.h-\[6rem\] {
+  height: 6rem;
+}
+
+.h-24 {
+  height: 6rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
 .max-h-96 {
   max-height: 24rem;
 }
@@ -828,6 +856,18 @@ video {
 
 .w-10 {
   width: 2.5rem;
+}
+
+.w-\[40\%\] {
+  width: 40%;
+}
+
+.w-\[6rem\] {
+  width: 6rem;
+}
+
+.w-24 {
+  width: 6rem;
 }
 
 .max-w-3xl {
@@ -1225,6 +1265,12 @@ video {
 .shadow-sm {
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow {
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 

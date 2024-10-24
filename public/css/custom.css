@@ -1,0 +1,27 @@
+#stack-preview-0 {
+    height: 4rem !important;
+    margin-bottom: -30px !important;
+    transform: perspective(400px) rotateX(65deg) !important;
+  /* this variable will define how much ci*/
+  --r: 20px;
+  /* whatever values/units you want */
+  background: 
+    radial-gradient(50% var(--r) at 50% var(--r), #0003 99.99%, #0000 0),
+    radial-gradient(50% var(--r) at 50% calc(100% - var(--r)), #fff3 99.99%, #0000 0),
+    #369;
+  border-radius: 100% / calc(var(--r) * 2);
+}
+
+.disk-pattern circle {
+  fill: currentColor;
+  opacity: 0.85;
+  mix-blend-mode: overlay;
+}
+
+.disk-side {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: none;
+  transform-origin: center top;
+}
