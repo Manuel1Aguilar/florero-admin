@@ -346,6 +346,7 @@ router.get('/view-order/:orderCode', (req, res) => {
             return res.status(404).send('Order not found.');
         }
 
+        const stockComparison = {};
         if (order.status === 'Pending') {
             // Fetch current stock and calculate updated stock after confirmation
             const colorSpec = order.color_spec;
@@ -355,7 +356,6 @@ router.get('/view-order/:orderCode', (req, res) => {
                 colorCounts[cKey] = (colorCounts[cKey] || 0) + 1;
             }
 
-            const stockComparison = {};
             const colorKeys = Object.keys(colorCounts);
 
             db.all('SELECT * FROM colors WHERE cKey IN (' + colorKeys.map(() => '?').join(',') + ')', colorKeys, (err, colors) => {
