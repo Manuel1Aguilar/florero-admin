@@ -5,6 +5,7 @@ import session from 'express-session';
 import dotenv from 'dotenv';
 import clientRoutes from './routes/clientRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import serveStatic from 'serve-static';
 
 // Load environment variables
 dotenv.config();
@@ -33,9 +34,14 @@ app.use(session({
 // Set view engine to EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
+const staticPath = path.join(process.cwd(), 'public');
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Use serveStatic with the specified root path
+app.use('/css', serveStatic(staticPath));
+// Use serveStatic with the specified root path
+app.use('/assets', serveStatic(staticPath));
 
 // Authentication middleware
 app.use((req, res, next) => {
