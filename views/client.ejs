@@ -1,8 +1,6 @@
-<div class="container w-full mx-auto py-2 bg-gray-100 text-gray-800 flex flex-col">
-  <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">Los floreros de Gustavo 💐</h1>
-
+<div class="container w-full mx-auto pb-2 bg-gray-100 text-gray-800 flex flex-col">
   <% if (colors.length > 0) { %>
-    <form hx-post="/save-order" hx-target="#general-modal-content" hx-swap="innerHTML"  class="space-y-4 bg-white p-4 rounded-md shadow-md flex-grow flex flex-col" onsubmit="prepareOrderData(event); showModal();">
+    <form id='order-form' hx-post="/save-order" hx-target="#general-modal-content" hx-swap="innerHTML"  class=" bg-white p-4 rounded-md shadow-md flex-grow flex flex-col" onsubmit="prepareOrderData(event); showModal();">
       <div class="flex flex-col md:flex-row gap-4 w-full items-start flex-grow">
         <div class="flex flex-col space-y-2 w-full md:w-1/4">
           <label for="client_name" class="text-lg font-semibold">Tu nombre:</label>
@@ -17,11 +15,11 @@
           </select>
         </div>
         <div class="flex flex-col items-center md:items-center w-full md:w-1/4 mx-auto">
-<div id="stack-preview" class="flex flex-col justify-between space-y-1 w-full">
+<div id="stack-preview" class="stack-preview flex flex-col justify-between space-y-1 w-full">
   <!-- Stack sides with perspective -->
   <% for (let i = 0; i < 25; i++) { %>
     <div id="stack-preview-<%= i %>" 
-      class="disk-side mx-auto cursor-pointer w-1/2"
+      class="disk-side mx-auto w-1/2"
       style="
         background-color: <%= colors[0].hex_code %>;
         height: 1.4rem;
@@ -48,14 +46,11 @@
 <div>
 <div class="flex w-full px-2 justify-between items-center mt-4">
 <button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="openExampleModal()">Ver ejemplos</button>
-<button type="submit" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">Guardar pedido</button>
+<button type="button" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="submitOrderForm()">Guardar pedido</button>
 </div>
 <div id="general-modal" class="fixed inset-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50" style="display:none;">
   <div class="bg-white p-6 rounded-md shadow-md w-1/2">
     <div id="general-modal-content" class="mb-6"></div>
-    <div class="w-full flex justify-end">
-        <a href="/" class="block mt-6 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-center">Cerrar</a>
-    </div>
   </div>
 </div>
 <script>
@@ -167,5 +162,12 @@
     const modal = document.getElementById('general-modal');
     modal.style.display = 'flex';
   }
+  function submitOrderForm() {
+    const form = document.getElementById('order-form');
+    if (form) {
+        form.requestSubmit();  
+    }
+  }
+
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vibrate.js/1.0.0/vibrate.min.js"/>

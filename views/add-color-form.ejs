@@ -1,11 +1,11 @@
 <div id="add-color-form-content" class="bg-white p-3 rounded-md shadow-md mb-3 w-full mx-auto border border-gray-200">
   <form hx-post="/admin/update-stock" hx-target="tbody" hx-swap="beforeend"  class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="mb-0.5 col-span-1">
-      <label for="cName" class="block mb-1 font-semibold">Color Name:</label>
+      <label for="cName" class="block mb-1 font-semibold">Nombre de color:</label>
       <input type="text" id="cName" name="cName" required class="w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
     </div>
     <div class="mb-1 col-span-1">
-      <label for="cKey" class="block mb-2 font-semibold">Color Key:</label>
+      <label for="cKey" class="block mb-2 font-semibold">Codigo de color:</label>
       <input type="text" id="cKey" name="cKey" required class="w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
     </div>
     <div class="mb-2 col-span-1">
@@ -16,12 +16,12 @@
       <label for="stock" class="block mb-2 font-semibold">Stock:</label>
       <input type="number" id="stock" name="new_stock" min="0" required class="w-full p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
     </div>
-    <div class="col-span-2 flex gap-4">
+    <div class="col-span-2 flex gap-4 justify-end">
+    <button onclick="toggleAddColorForm()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-1 focus:ring-red-500">
+      Cerrar
+    </button>
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-1 focus:ring-blue-500">
-        Add
-      </button>
-      <button type="button" onclick="closeAddColorModal()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-1 focus:ring-red-500">
-        Close
+        Agregar
       </button>
     </div>
   </form>

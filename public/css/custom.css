@@ -1,3 +1,6 @@
+.disk-side:hover {
+    cursor: url('../assets/paintroller-24.png'), auto;
+}
 #stack-preview-0 {
     height: 4rem !important;
     margin-bottom: -30px !important;
