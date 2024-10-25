@@ -51,8 +51,8 @@ app.use((req, res, next) => {
 
 // Use routes
 
-app.use(clientRoutes);
-app.use(adminRoutes);
+app.use('/', clientRoutes);
+app.use('/', adminRoutes);
 
 // Start the server
 app.listen(PORT, () => {
