@@ -1316,6 +1316,10 @@ video {
 }
 
 @media (min-width: 768px) {
+  .md\:block {
+    display: block;
+  }
+
   .md\:w-1\/4 {
     width: 25%;
   }

@@ -44,10 +44,15 @@
   <% } %>
 </div>
 <div>
-<div class="flex w-full px-2 justify-between items-center mt-4">
-<button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="openExampleModal()">Ver ejemplos</button>
+<div class="flex w-full px-2 justify-between items-center mt-4 flex-col md:flex-row">
+<button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="openExampleModal()">Ver referencias</button>
+<div class="flex items-center gap-2 hidden md:block">
+  <input type="text" id="order-code" class="border border-gray-300 p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Código de orden">
+  <button type="button" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="fetchOrderDetails()">Buscar orden</button>
+</div>
 <button type="button" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="submitOrderForm()">Guardar pedido</button>
 </div>
+
 <div id="general-modal" class="fixed inset-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50" style="display:none;">
   <div class="bg-white p-6 rounded-md shadow-md w-1/2">
     <div id="general-modal-content" class="mb-6"></div>
@@ -66,6 +71,17 @@
   }
   document.body.addEventListener('mouseup', stopPainting);
   document.body.addEventListener('touchend', stopPainting);
+
+  function fetchOrderDetails() {
+    const orderCode = document.getElementById('order-code').value;
+    if(orderCode) {
+        htmx.ajax('GET', `/view-order/${orderCode}`, { target: '#general-modal-content', swap: 'innerHTML' });
+        const modal = document.getElementById('general-modal');
+        modal.style.display = 'flex';
+    } else {
+        alert('Debe ingresar el codigo de su orden');
+    }
+  }
 
   function handleTouchMove(event) {
     event.preventDefault();
@@ -134,10 +150,10 @@
       updateStock(previousColorKey, 1);
     }
 
-    if (currentStock > 0) {
       stackPreview.style.backgroundColor = hexCode;
       stackPreview.setAttribute('data-ckey', colorKey);
       updateStock(colorKey, -1);
+    if (currentStock > 0) {
       colorSelector.classList.remove('text-red-600');
     } else {
       colorSelector.classList.add('text-red-600');
@@ -171,3 +187,4 @@
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vibrate.js/1.0.0/vibrate.min.js"/>
+

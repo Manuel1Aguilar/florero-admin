@@ -332,35 +332,18 @@ router.post('/admin/delete-color', isAuthenticated, (req, res) => {
         res.send(''); // Sending an empty response so the row is removed from the page
     });
 });
-
-// Delete order - Handle deletion of an order
-router.post('/admin/delete-order', isAuthenticated, (req, res) => {
-    const db = getDatabaseConnection();
-    const { order_id } = req.body;
-    
-    if (!order_id) {
-        return res.status(400).send('Order ID is required to delete an order.');
-    }
-
-    const deleteQuery = `DELETE FROM orders WHERE id = ?`;
-    db.run(deleteQuery, [order_id], function (err) {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error deleting order');
-        }
-        res.send(''); // Sending an empty response so the row is removed from the page
-    });
-});
-
 // View Order - Render the order details view
-router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
+router.get('/view-order/:orderCode', (req, res) => {
     const db = getDatabaseConnection();
-    const { orderId } = req.params;
+    const { orderCode } = req.params;
 
-    db.get('SELECT * FROM orders WHERE id = ?', [orderId], (err, order) => {
-        if (err || !order) {
+    db.get('SELECT * FROM orders WHERE order_code = ?', [orderCode], (err, order) => {
+        if (err) {
             console.log(err);
             return res.status(500).send('Error fetching order details.');
+        }
+        if (!order) {
+            return res.status(404).send('Order not found.');
         }
 
         if (order.status === 'Pending') {
@@ -390,11 +373,30 @@ router.get('/admin/view-order/:orderId', isAuthenticated, (req, res) => {
                     };
                 });
 
-                res.render('order_detail', { order, stockComparison, authenticated: true });
+                res.render('order_detail', { order, stockComparison, authenticated: req.session.authenticated });
             });
         } else {
-            res.render('order_detail', { order, stockComparison: null, authenticated: true });
+            res.render('order_detail', { order, stockComparison, authenticated: req.session.authenticated });
         }
+    });
+});
+
+// Delete order - Handle deletion of an order
+router.post('/admin/delete-order', isAuthenticated, (req, res) => {
+    const db = getDatabaseConnection();
+    const { order_id } = req.body;
+    
+    if (!order_id) {
+        return res.status(400).send('Order ID is required to delete an order.');
+    }
+
+    const deleteQuery = `DELETE FROM orders WHERE id = ?`;
+    db.run(deleteQuery, [order_id], function (err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error deleting order');
+        }
+        res.send(''); // Sending an empty response so the row is removed from the page
     });
 });
 
