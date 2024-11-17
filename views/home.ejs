@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='50%' x='50%' dy='.3em' font-size='24' text-anchor='middle'>💐</text></svg>">
@@ -9,6 +8,7 @@
   <link rel="stylesheet" href="css/custom.css">
   <script src="https://unpkg.com/htmx.org@1.6.1"></script>
   <script>
+    let isPainting = false;
     document.addEventListener('htmx:responseError', function(evt) {
       if (evt.detail.xhr && evt.detail.xhr.responseText) {
         alert('Error: ' + evt.detail.xhr.responseText);
@@ -17,105 +17,52 @@
       }
     });
 
-    // Function to load admin login page and handle authentication status
-    function loadAdminLogin() {
-      htmx.ajax('GET', '/admin', {
-        target: '#main-content',
-        swap: 'innerHTML'
-      }).then(() => {
-        updateNavBarForAuthenticatedUser();
-      });
-    }
-
     // Function to handle logout and load the client page
     function handleLogout(event) {
-      event.preventDefault(); // Prevent default link navigation
+      event.preventDefault();
+      const mainContent = document.getElementById('main-content');
       htmx.ajax('GET', '/admin/logout', {
-        target: '#main-content',
-        swap: 'innerHTML'
-      }).then(() => {
-        updateNavBarForUnauthenticatedUser();
-        setDefaultClientView();
+        target: '#main-content', 
+        swap: 'innerHTML',       
+        }).then(() => {
+        const toggleButton = document.getElementById('toggle-button');
+        if (toggleButton) {
+          toggleButton.textContent = '🤓 Admin'; // Set appropriate toggle text after logout
+        }
+        mainContent.classList.toggle('client-view');
+      }).catch((error) => {
+        console.error("Logout failed", error);
+        alert("An error occurred during logout. Please try again.");
       });
     }
 
-    // Function to update the navigation bar for authenticated user
-    function updateNavBarForAuthenticatedUser() {
-      const nav = document.querySelector('nav .nav-buttons.right');
-
-      if (!nav) return;
-
-      // Remove login button if it exists
-      const loginButton = nav.querySelector('.login-button');
-      if (loginButton) {
-        loginButton.remove();
-      }
-
-      // Add the logout button if it doesn't already exist
-      if (!nav.querySelector('.logout-button')) {
-        const logoutButton = document.createElement('button');
-logoutButton.className = 'bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 logout-button';
-        logoutButton.title = 'Cerrar sesión';
-        logoutButton.innerHTML = '<span class="icon">🔑</span><span class="text">Cerrar sesión</span>';
-        logoutButton.onclick = handleLogout;
-        nav.appendChild(logoutButton);
-      }
-
-      // Add the toggle button to the left
-      const leftNav = document.querySelector('nav .nav-buttons.left');
-      if (!leftNav.querySelector('.toggle-button')) {
-        const toggleButton = document.createElement('button');
-toggleButton.className = 'bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 toggle-button';
-        toggleButton.onclick = toggleAdminClientContent;
-        toggleButton.title = 'Cambiar entre vista de administración y cliente';
-        toggleButton.innerHTML = '<span id="toggle-icon">🛒</span><span class="text">Vista Cliente/Admin</span>';
-        leftNav.appendChild(toggleButton);
-      }
-    }
-
-    // Function to update the navigation bar for unauthenticated user
-    function updateNavBarForUnauthenticatedUser() {
-      const nav = document.querySelector('nav .nav-buttons.right');
-
-      // Remove logout button if it exists
-      const logoutButton = nav.querySelector('.logout-button');
-      if (logoutButton) logoutButton.remove();
-
-      // Add the login button if it doesn't already exist
-      if (!nav.querySelector('.login-button')) {
-        const loginButton = document.createElement('button');
-loginButton.className = 'bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 login-button';
-        loginButton.title = 'Iniciar sesión';
-        loginButton.onclick = loadAdminLogin;
-        loginButton.innerHTML = '<span class="icon">🔓</span><span class="text">Iniciar sesión</span>';
-        nav.appendChild(loginButton);
-      }
-
-      // Remove the toggle button if it exists
-      const leftNav = document.querySelector('nav .nav-buttons.left');
-      const toggleButton = leftNav.querySelector('.toggle-button');
-      if (toggleButton) toggleButton.remove();
-    }
-
-    // Listen for the `htmx:afterRequest` event to update the navbar after every successful request
-    document.addEventListener('htmx:afterRequest', function(evt) {
-      if (evt.detail.successful && evt.detail.path && evt.detail.path.includes('/admin')) {
-        updateNavBarForAuthenticatedUser();
-      }
-    });
 
     function toggleAdminClientContent() {
       const mainContent = document.getElementById('main-content');
-      const toggleIcon = document.getElementById('toggle-icon');
-      const targetView = mainContent.classList.contains('client-view') ? '/client' : '/admin';
+      const toggleButton = document.getElementById('toggle-button');
+
+      if (!mainContent) {
+        console.error("Element #main-content not found");
+        return;
+      }
+
+      const isClientView = mainContent.classList.contains('client-view');
+      const targetView = isClientView ? '/admin' : '/client';
+
       htmx.ajax('GET', targetView, {
         target: '#main-content',
-        swap: 'innerHTML'
+        swap: 'innerHTML',
       }).then(() => {
+        if (toggleButton) {
+          toggleButton.textContent = !isClientView ? '🤓 Admin' : '🥸 Cliente';
+        }
         mainContent.classList.toggle('client-view');
-        toggleIcon.textContent = mainContent.classList.contains('client-view') ? '🛒' : '🛠️';
+      }).catch((error) => {
+        console.error("View toggle failed", error);
+        alert("An error occurred while switching views. Please try again.");
       });
     }
+
 
     function setDefaultClientView() {
       const mainContent = document.getElementById('main-content');
@@ -146,33 +93,16 @@ loginButton.className = 'bg-gray-600 hover:bg-gray-800 text-white font-bold py-2
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-      updateNavBarForUnauthenticatedUser();
       setDefaultClientView();
     });
   </script>
 </head>
 <body class="bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 text-gray-800 h-screen flex flex-col">
   <nav class="w-full shadow-md p-3 flex justify-between items-center fixed top-0 left-0 right-0 transition-transform duration-300 ease-in-out" style="height: 3rem; background: linear-gradient(to right, #e0f2ff, #b3d9ff);">
-    <div class="nav-buttons left flex-grow">
-      <% if (authenticated) { %>
-        <button class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 toggle-button" onclick="toggleAdminClientContent()" title="Cambiar entre vista de administración y cliente">
-          <span id="toggle-icon">🛒</span>
-          <span class="text">Vista Cliente/Admin</span>
-        </button>
-      <% } %>
-    </div>
     <div class="nav-buttons right">
-      <% if (authenticated) { %>
-        <button class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 logout-button" onclick="handleLogout(event)" title="Cerrar sesión">
-          <span class="icon">🔑</span>
-          <span class="text">Cerrar sesión</span>
+        <button id='toggle-button' class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 login-button" onclick="toggleAdminClientContent()" title="Admin">
+            🤓 Admin
         </button>
-      <% } else { %>
-        <button class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 login-button" onclick="loadAdminLogin()" title="Iniciar sesión">
-          <span class="icon">🔓</span>
-          <span class="text">Iniciar sesión</span>
-        </button>
-      <% } %>
     </div>
   </nav>
   <div id="main-content" class="p-8 flex-grow mt-8 client-view">

@@ -1,6 +1,7 @@
-<div id="admin-content" class="bg-white p-8 rounded-md shadow-md w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center ">
+<div id="admin-content">
   <% if (!authenticated) { %>
-    <div class="w-full max-w-xs">
+    <div class="bg-white p-8 rounded-md shadow-md md:w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
+    <div class="bg-white p-8 rounded-md shadow-md md:w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
       <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">Admin Login</h1>
       <form action="/admin/login" method="POST" hx-post="/admin/login" hx-target="#admin-content">
         <div class="mb-4">
@@ -12,27 +13,35 @@
         </button>
       </form>
     </div>
+    </div>
   <% } else { %>
-    <div class="w-full max-w-lg">
-      <h2 class="text-2xl font-bold mb-4 text-center text-green-600">Bienvenido, Gus!</h2>
-      <p class="mb-4 text-center">Administración:</p>
-      <ul class="space-y-4">
-        <li>
-          <a href="/admin/manage-stock" hx-get="/admin/manage-stock" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            Administrar stock
-          </a>
-        </li>
-        <li>
-          <a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            Administrar ordenes
-          </a>
-        </li>
-        <li>
-          <a href="/admin/manage-media" hx-get="/admin/manage-media" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            Administrar referencias
-          </a>
-        </li>
-      </ul>
+    <div class="bg-white p-8 rounded-md shadow-md md:w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
+        <div class="bg-white p-8 rounded-md shadow-md md:w-3/4 h-3/4 mx-auto flex flex-col items-center justify-center">
+          <h2 class="text-2xl font-bold mb-4 text-center text-green-600">Bienvenido, Gus!</h2>
+          <p class="mb-4 text-center">Administración:</p>
+          <ul class="space-y-4">
+            <li>
+              <a href="/admin/manage-stock" hx-get="/admin/manage-stock" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Administrar stock
+              </a>
+            </li>
+            <li>
+              <a href="/admin/manage-orders" hx-get="/admin/manage-orders" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Administrar ordenes
+              </a>
+            </li>
+            <li>
+              <a href="/admin/manage-media" hx-get="/admin/manage-media" hx-target="#admin-content" hx-swap="innerHTML" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md text-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Administrar referencias
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="flex flex w-full m-4 justify-end">
+            <div>
+                <button class="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="handleLogout(event)"> Cerrar sesión</button>
+            </div>
+        </div>
     </div>
   <% } %>
 </div>

@@ -10,7 +10,7 @@
           <label for="color_selector" class="text-lg font-semibold">Personalizá tu florero:</label>
           <select id="color_selector" class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
             <% colors.forEach(color => { %>
-              <option value="<%= color.cKey %>" data-hex="<%= color.hex_code %>" data-stock="<%=color.stock %>"><%= color.cName %>, Stock:<%= color.stock %></option>
+              <option value="<%= color.cKey %>" data-hex="<%= color.hex_code %>" data-stock="<%=color.stock %>"><%= color.cName %>, Stock: <%= color.stock %></option>
             <% }); %>
           </select>
         </div>
@@ -60,7 +60,6 @@
 </div>
 
 <script>
-  let isPainting = false;
 
 
   function startPainting() {
@@ -76,9 +75,19 @@
   function fetchOrderDetails() {
     const orderCode = document.getElementById('order-code').value;
     if(orderCode) {
-        htmx.ajax('GET', `/view-order/${orderCode}`, { target: '#general-modal-content', swap: 'innerHTML' });
-        const modal = document.getElementById('general-modal');
-        modal.style.display = 'flex';
+        htmx.ajax('GET', `/view-order/${orderCode}`, { target: '#general-modal-content', swap: 'innerHTML' })
+            .then(response => {
+                if(response.status === 200) {
+                    const modal = document.getElementById('general-modal');
+                    modal.style.display = 'flex';
+                } else {
+                    alert('No se encontró la orden. Verifique el codigo e intente de nuevo');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching order details:', error);
+                alert('Hubo un problema al intentar recuperar los detalles de la orden.');
+            });
     } else {
         alert('Debe ingresar el codigo de su orden');
     }
@@ -162,7 +171,7 @@
     }
   }
 
-  (function initializeStackPreview() {
+  function initializeStackPreview() {
     const colorSelector = document.querySelector('#color_selector');
     if (colorSelector && colorSelector.options.length > 0) {
       const initialColorKey = colorSelector.value;
@@ -174,7 +183,7 @@
       }
       updateStock(initialColorKey, -25);
     }
-  })();
+  }
   function showModal() {
     const modal = document.getElementById('general-modal');
     modal.style.display = 'flex';
@@ -184,6 +193,9 @@
     if (form) {
         form.requestSubmit();  
     }
+  }
+  window.onload = function() {
+    initializeStackPreview();
   }
 
 </script>
