@@ -50,16 +50,16 @@
   </div>
 
 <% if (authenticated) { %>
-  <div class="flex gap-4 justify-center mb-6">
+  <div class="flex gap-2 justify-center mb-6">
     <% if (order.status === 'Pending') { %>
-      <button hx-post="/admin/confirm-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to confirm this order?')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500">
+      <button hx-post="/admin/confirm-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to confirm this order?')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500">
         Confirmar orden
       </button>
-      <button hx-post="/admin/deny-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to deny this order?')" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500">
+      <button hx-post="/admin/deny-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to deny this order?')" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500">
         Denegar orden 
       </button>
     <% } %>
-    <button hx-post="/admin/delete-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to delete this order?')" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500">
+    <button hx-post="/admin/delete-order" hx-vals='{"order_id": "<%= order.id %>"}' hx-target="#order-<%= order.id %>" hx-swap="outerHTML" onclick="return confirm('Are you sure you want to delete this order?')" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-2 rounded-md shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500">
       Eliminar orden
     </button>
   </div>
