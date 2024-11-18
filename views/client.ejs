@@ -139,7 +139,6 @@
 
       if (currentStock <= 0) {
         colorOption.classList.add('text-red-600');
-        navigator.vibrate(200);
       } else {
         colorOption.classList.remove('text-red-600');
       }
@@ -167,7 +166,6 @@
       colorSelector.classList.remove('text-red-600');
     } else {
       colorSelector.classList.add('text-red-600');
-      navigator.vibrate(200);
     }
   }
 
@@ -199,5 +197,3 @@
   }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vibrate.js/1.0.0/vibrate.min.js"/>
-
